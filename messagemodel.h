@@ -18,10 +18,31 @@ struct Message {
     QDateTime timestamp;
 };
 
-class messageModel
+class messageModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
-    messageModel();
+
+    enum Roles {
+        TypeRole = Qt::UserRole + 1,
+        ContentRole,
+        IsOwnRole,
+        TimestampRole
+    };
+
+    explicit messageModel(QObject* parent = nullptr);
+
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+    QHash<int, QByteArray> roleNames() const override;
+
+    Q_INVOKABLE void addMessage(const QString& content, bool isOwn, const QString& typeStr = "text");
+
+private:
+    QList<Message> m_messages;
+    static Message::Type stringToType (const QString& typeStr);
+
 };
 
 #endif // MESSAGEMODEL_H
