@@ -60,3 +60,16 @@ void messageModel::addMessage(const QString &content, bool isOwn, const QString 
 
     endInsertRows();
 }
+
+void messageModel::addMessageEx(const QString &sender, const QString &content, bool isOwn, const QString &type, const QString &timestamp) {
+    beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());
+
+    Message msg;
+    msg.type = stringToType(type);
+    msg.content = content;
+    msg.isOwn = isOwn;
+
+    m_messages.append(msg);
+
+    endInsertRows();
+}

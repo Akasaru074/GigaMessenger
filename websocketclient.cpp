@@ -7,19 +7,27 @@
 WebSocketClient::WebSocketClient(QObject *parent)
     : QObject{parent}
 {
-    connect(&m_socket, &QWebSocket::connected, this, &WebSocketClient::onConnected);
-    connect(&m_socket, &QWebSocket::disconnected, this, &WebSocketClient::onDisconnected);
-    connect(&m_socket, &QWebSocket::textMessageReceived, this, &WebSocketClient::onTextMessageReceived);
-    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WebSocketClient::onSocketError);
+    m_socket = new QWebSocket();
+
+    m_socket->setParent(this);
+
+    connect(m_socket, &QWebSocket::connected, this, &WebSocketClient::onConnected);
+    connect(m_socket, &QWebSocket::disconnected, this, &WebSocketClient::onDisconnected);
+    connect(m_socket, &QWebSocket::textMessageReceived, this, &WebSocketClient::onTextMessageReceived);
+    connect(m_socket, &QWebSocket::errorOccurred, this, &WebSocketClient::onSocketError);
+}
+
+WebSocketClient::~WebSocketClient() {
+    m_socket->close();
 }
 
 void WebSocketClient::connectToServer(const QString &url, const QString &username) {
     m_username = username;
-    m_socket.open(QUrl(url));
+    m_socket->open(QUrl(url));
 }
 
 void WebSocketClient::disconnectFromServer() {
-    m_socket.close();
+    m_socket->close();
 }
 
 void WebSocketClient::sendMessage(const QString &content, const QString &type) {
@@ -30,7 +38,7 @@ void WebSocketClient::sendMessage(const QString &content, const QString &type) {
     msg["timestamp"] = QDateTime::currentSecsSinceEpoch();
 
     QJsonDocument doc(msg);
-    m_socket.sendTextMessage(doc.toJson(QJsonDocument::Compact));
+    m_socket->sendTextMessage(doc.toJson(QJsonDocument::Compact));
 }
 
 void WebSocketClient::onConnected() {
@@ -66,7 +74,7 @@ void WebSocketClient::onTextMessageReceived(const QString &message) {
 }
 
 void WebSocketClient::onSocketError(QAbstractSocket::SocketError error) {
-    QString errStr = m_socket.errorString();
+    QString errStr = m_socket->errorString();
     qDebug() << "WebSocket error: " << errStr;
     emit errorOccurred(errStr);
 }

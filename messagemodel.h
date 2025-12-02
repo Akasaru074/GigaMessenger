@@ -38,6 +38,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE void addMessage(const QString& content, bool isOwn, const QString& typeStr = "text");
+    Q_INVOKABLE void addMessageEx(const QString& sender, const QString& content, bool isOwn, const QString& type, const QString& timestamp);
 
 private:
     QList<Message> m_messages;

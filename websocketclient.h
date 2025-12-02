@@ -10,6 +10,7 @@ class WebSocketClient : public QObject
     Q_OBJECT
 public:
     explicit WebSocketClient(QObject *parent = nullptr);
+    ~WebSocketClient();
     Q_INVOKABLE void connectToServer(const QString& url, const QString& username);
     Q_INVOKABLE void disconnectFromServer();
     Q_INVOKABLE void sendMessage(const QString& content, const QString& type = "text");
@@ -27,7 +28,7 @@ private slots:
     void onSocketError(QAbstractSocket::SocketError error);
 
 private:
-    QWebSocket m_socket;
+    QWebSocket* m_socket;
     QString m_username;
 };
 

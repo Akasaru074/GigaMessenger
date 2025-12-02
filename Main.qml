@@ -15,6 +15,10 @@ Window {
     visible: true
     title: qsTr("Giga Messenger")
 
+    Component.onCompleted: {
+        console.log("QML: Window loaded successfully")
+    }
+
     MessageModel {
         id: messageModel
     }
@@ -26,7 +30,38 @@ Window {
             console.log("QML: Connected to server")
         }
 
+        onMessageReceived: (sender, content, type, timestamp) => {
+            console.log("QML: Received message: ", sender, content, type)
+            messageModel.addMessageEx(sender, content, false, type, timestamp)
+        }
 
+        onErrorOccurred: (error) => {
+            console.error("Error: ", error)
+        }
+
+    }
+
+    Dialog {
+        id: nameDialog
+        title: "Name"
+        standardButtons: Dialog.Ok
+        modal: true
+        visible: true
+
+        Column {
+            Text { text: "Enter your name:" }
+            TextField {
+                id: nameField
+                placeholderText: "Your name"
+                text: "User"
+                selectByMouse: true
+                onAccepted: nameDialog.accept()
+            }
+        }
+
+        onAccepted: {
+            wsClient.connectToServer("ws://localhost:8080", nameField.text)
+        }
 
     }
 
@@ -106,10 +141,11 @@ Window {
     function sendMessage() {
         if (inputField.text.trim() === "") return;
 
-        messageModel.addMessage(inputField.text, true, "text");
+        wsClient.sendMessage(inputField.text, "text");
+
+        messageModel.addMessageEx(nameField.text, inputField.text, true, "text", new Date().toTimeString().substr(0,5));
 
         inputField.text = "";
-
     }
 
 }
