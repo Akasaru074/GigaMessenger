@@ -1,9 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Dialogs
+
 import Messenger.Models 1.0
+import Messenger.Network 1.0
 
 Window {
+    id: window
     maximumWidth: 1080
     maximumHeight: 720
     minimumWidth: 900
@@ -13,9 +17,17 @@ Window {
 
     MessageModel {
         id: messageModel
-        Component.onCompleted: {
-            addMessage("Test message", false, "text");
+    }
+
+    WebSocketClient {
+        id: wsClient
+
+        onConnected: {
+            console.log("QML: Connected to server")
         }
+
+
+
     }
 
     ListView {
