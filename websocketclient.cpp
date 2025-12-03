@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QDateTime>
 #include <QDebug>
+#include <QTimer>
 
 WebSocketClient::WebSocketClient(QObject *parent)
     : QObject{parent}
@@ -26,6 +27,14 @@ WebSocketClient::~WebSocketClient() {
 void WebSocketClient::connectToServer(const QString &url, const QString &username) {
     m_username = username;
     m_socket->open(QUrl(url));
+
+    QTimer::singleShot(100, this, [this](){
+        QJsonObject joinMsg;
+        joinMsg["type"] = "join";
+        joinMsg["username"] = m_username;
+        QJsonDocument doc(joinMsg);
+        m_socket->sendTextMessage(doc.toJson(QJsonDocument::Compact));
+    });
 }
 
 void WebSocketClient::disconnectFromServer() {
@@ -67,6 +76,13 @@ void WebSocketClient::onTextMessageReceived(const QString &message) {
     if (!doc.isObject()) return;
 
     QJsonObject obj = doc.object();
+
+    if (obj["type"].toString() == "online_users") {
+        QVariantList users = obj["users"].toVariant().toList();
+        emit onlineUsersUpdated(users);
+        return;
+    }
+
     QString sender = obj["sender"].toString();
     QString type = obj["type"].toString();
     QString content = obj["content"].toString();

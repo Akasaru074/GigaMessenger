@@ -25,6 +25,10 @@ Window {
         id: messageModel
     }
 
+    ListModel {
+        id: onlineUsersModel
+    }
+
     WebSocketClient {
         id: wsClient
 
@@ -39,6 +43,13 @@ Window {
 
         onErrorOccurred: (error) => {
             console.error("Error: ", error)
+        }
+
+        onOnlineUsersUpdated: (usernames) => {
+            onlineUsersModel.clear();
+            for (let i = 0; i < usernames.length; i++) {
+                onlineUsersModel.append({ name: usernames[i] });
+            }
         }
 
     }
@@ -70,10 +81,16 @@ Window {
 
     ListView {
         id: chatView
-        anchors.fill: parent
-        anchors.bottomMargin: inputArea.height + 10
-        spacing: 8
+        anchors {
+            top: parent.top
+            left: parent.left
+            bottom: inputArea.top
+            right: userListPanel.left
+        }
 
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
+        spacing: 8
         model: messageModel
 
         delegate: Column {
@@ -93,7 +110,7 @@ Window {
             }
 
             Rectangle {
-                width: Math.min(parent.width * 0.7, contentText.implicitWidth + 20)
+                width: Math.min(chatView.width * 0.75, contentText.implicitWidth + 20)
                 height: Math.max(40, contentText.implicitHeight + 16)
                 radius: 10
                 color: isOwn ? "#dcf8c6" : "#ffffff"
@@ -127,11 +144,9 @@ Window {
         }
 
         onCountChanged: {
-            scrollToIndex(chatView.count - 1)
-        }
-
-        function scrollToIndex(index) {
-            chatView.positionViewAtIndex(index, ListView.AtTop)
+            Qt.callLater(function() {
+                chatView.positionViewAtEnd();
+            })
         }
 
     }
@@ -177,6 +192,45 @@ Window {
         messageModel.addMessageEx(nameField.text, inputField.text, true, "text", new Date().toTimeString().substr(0,5));
 
         inputField.text = "";
+    }
+
+    Rectangle {
+        id: userListPanel
+        width: 180
+        anchors {
+            top: parent.top
+            right: parent.right
+            bottom: inputArea.top
+        }
+        color: "#f9f9f9"
+        border.color: "#ddd"
+
+        Text {
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Online (" + onlineUsersModel.count + ")"
+            font.bold: true
+            padding: 8
+        }
+
+        ListView {
+            anchors.fill: parent
+            anchors.topMargin: 30
+            model: onlineUsersModel
+            clip: true
+            delegate: Rectangle {
+                width: parent.width
+                height: 30
+                color: index % 2 ? "#f0f0f0" : "transparent"
+                Text {
+                    text: name
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    font.pointSize: 13
+                }
+            }
+        }
     }
 
 }

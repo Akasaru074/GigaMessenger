@@ -20,6 +20,7 @@ signals:
     void disconnected();
     void errorOccurred(const QString& error);
     void messageReceived(const QString& sender, const QString& content, const QString& type, const QString& timestamp);
+    void onlineUsersUpdated(const QVariantList& usernames);
 
 private slots:
     void onConnected();
