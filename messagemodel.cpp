@@ -26,6 +26,8 @@ QVariant messageModel::data(const QModelIndex &index, int role) const {
         return msg.isOwn;
     case TimestampRole:
         return msg.timestamp.toString("hh::mm");
+    case SenderRole:
+        return msg.sender;
     default:
         return QVariant();
     }
@@ -38,6 +40,7 @@ QHash<int, QByteArray> messageModel::roleNames() const {
     roles[ContentRole] = "content";
     roles[IsOwnRole] = "isOwn";
     roles[TimestampRole] = "timestamp";
+    roles[SenderRole] = "sender";
     return roles;
 }
 
@@ -55,6 +58,21 @@ void messageModel::addMessage(const QString &content, bool isOwn, const QString 
     msg.content = content;
     msg.isOwn = isOwn;
     msg.timestamp = QDateTime::currentDateTime();
+
+    m_messages.append(msg);
+
+    endInsertRows();
+}
+
+void messageModel::addMessageEx(const QString &sender, const QString &content, bool isOwn, const QString &type, const QString &timestamp) {
+    beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());
+
+    Message msg;
+    msg.sender = sender;
+    msg.type = stringToType(type);
+    msg.content = content;
+    msg.isOwn = isOwn;
+    msg.timestamp = QDateTime::fromString(timestamp, "hh:mm");
 
     m_messages.append(msg);
 

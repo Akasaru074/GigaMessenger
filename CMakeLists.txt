@@ -4,7 +4,7 @@ project(GigaMessenger VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Network WebSockets)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -20,6 +20,7 @@ qt_add_qml_module(appGigaMessenger
         SOURCES messagemodel.h messagemodel.cpp
         SOURCES messagemodel.cpp messagemodel.h
         SOURCES messagemodel.cpp
+        SOURCES websocketclient.h websocketclient.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -39,6 +40,7 @@ target_link_libraries(appGigaMessenger
     PRIVATE Qt6::Quick
     PRIVATE Qt6::QuickControls2
     PRIVATE Qt6::Network
+    PRIVATE Qt6::WebSockets
 )
 
 include(GNUInstallDirs)
