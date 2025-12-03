@@ -12,6 +12,7 @@ struct Message {
         Emoji
     };
 
+    QString sender;
     Type type;
     QString content;
     bool isOwn;
@@ -27,7 +28,8 @@ public:
         TypeRole = Qt::UserRole + 1,
         ContentRole,
         IsOwnRole,
-        TimestampRole
+        TimestampRole,
+        SenderRole
     };
 
     explicit messageModel(QObject* parent = nullptr);

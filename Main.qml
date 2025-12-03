@@ -13,7 +13,9 @@ Window {
     minimumWidth: 900
     minimumHeight: 600
     visible: true
-    title: qsTr("Giga Messenger")
+    title: "Giga Messenger" + (myName ? " - " + myName : "")
+
+    property string myName: ""
 
     Component.onCompleted: {
         console.log("QML: Window loaded successfully")
@@ -60,7 +62,8 @@ Window {
         }
 
         onAccepted: {
-            wsClient.connectToServer("ws://localhost:8080", nameField.text)
+            myName = nameField.text
+            wsClient.connectToServer("ws://localhost:8080", myName)
         }
 
     }
@@ -73,26 +76,54 @@ Window {
 
         model: messageModel
 
-        delegate: Rectangle {
+        delegate: Column {
             width: chatView.width
-            height: Math.max(40, contentText.implicitHeight + 16)
-            radius: 10
-            color: isOwn ? "#d1f0da" : "#f0f0f0"
-            border.color: isOwn ? "#c0e6a5" : "#e0e0e0"
-            border.width: 1
+            spacing: 4
 
             Text {
-                id: contentText
-                text: content
-                wrapMode: Text.Wrap
-                width: parent.width - 20
-                anchors.verticalCenter: parent.verticalCenter
+                text: sender
+                font.bold: true
+                font.pixelSize: 12
+                color: isOwn ? "#008000" : "#333333"
+                anchors.horizontalCenter: isOwn ? undefined : parent.left
+                anchors.right: isOwn ? parent.right : undefined
+                anchors.left: isOwn ? undefined : parent.left
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+
+            Rectangle {
+                width: Math.min(parent.width * 0.7, contentText.implicitWidth + 20)
+                height: Math.max(40, contentText.implicitHeight + 16)
+                radius: 10
+                color: isOwn ? "#dcf8c6" : "#ffffff"
+                border.color: isOwn ? "#c0e6a5" : "#e0e0e0"
+                border.width: 1
+
                 anchors.left: isOwn ? undefined : parent.left
                 anchors.right: isOwn ? parent.right : undefined
-                anchors.margins: 10
-                font.pixelSize: 14
-                color: isOwn ? "#000000" : "#333333"
+                Text {
+                    id: contentText
+                    text: content
+                    wrapMode: Text.Wrap
+                    width: parent.width - 20
+                    anchors.centerIn: parent
+                    font.pixelSize: 14
+                    color: isOwn ? "#000000" : "#333333"
+                }
             }
+
+            Text {
+                text: timestamp
+                font.pixelSize: 10
+                color: "#888"
+                anchors.horizontalCenter: isOwn ? undefined : parent.left
+                anchors.right: isOwn ? parent.right : undefined
+                anchors.left: isOwn ? undefined : parent.left
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+            }
+
         }
 
         onCountChanged: {
